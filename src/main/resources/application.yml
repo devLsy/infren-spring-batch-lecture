@@ -8,12 +8,14 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL57Dialect
   datasource:
-    url: jdbc:mariadb://localhost:3307/metadb?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3307/metadb?serverTimezone=Asia/Seoul
     username: batch
     password: batch
 
   batch:
     jdbc:
       initialize-schema: always
+    job:
+      enabled: true
 #    job:
 #      names: ${job.name:NONE}
