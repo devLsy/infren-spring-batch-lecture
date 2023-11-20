@@ -8,7 +8,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL57Dialect
   datasource:
-    url: jdbc:mysql://localhost:3308/metadb?serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3307/metadb?serverTimezone=Asia/Seoul
     username: batch
     password: batch
 

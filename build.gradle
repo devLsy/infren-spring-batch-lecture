@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.quartz-scheduler:quartz'
     implementation 'org.apache.httpcomponents:httpclient'
+    implementation 'org.modelmapper:modelmapper:2.4.4'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
