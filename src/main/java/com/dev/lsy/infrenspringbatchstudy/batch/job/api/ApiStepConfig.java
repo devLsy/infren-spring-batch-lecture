@@ -1,5 +1,9 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job.api;
 
+import com.dev.lsy.infrenspringbatchstudy.batch.chunk.processor.ApiItemProcessor1;
+import com.dev.lsy.infrenspringbatchstudy.batch.chunk.processor.ApiItemProcessor2;
+import com.dev.lsy.infrenspringbatchstudy.batch.chunk.processor.ApiItemProcessor3;
+import com.dev.lsy.infrenspringbatchstudy.batch.classifier.ProcessorClassifier;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiRequestVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ProductVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.partition.ProductPartitioner;
@@ -25,6 +29,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -106,5 +111,17 @@ public class ApiStepConfig {
     public ItemProcessor itemProcessor() {
         ClassifierCompositeItemProcessor<ProductVo, ApiRequestVo> processor
                 = new ClassifierCompositeItemProcessor<ProductVo, ApiRequestVo>();
+
+        ProcessorClassifier<ProductVo, ItemProcessor<?, ? extends ApiRequestVo>> classifier = new ProcessorClassifier();
+        Map<String, ItemProcessor<ProductVo, ApiRequestVo>> processorMap = new HashMap<>();
+
+        processorMap.put("1", new ApiItemProcessor1());
+        processorMap.put("2", new ApiItemProcessor2());
+        processorMap.put("3", new ApiItemProcessor3());
+
+        classifier.setProcessorMap(processorMap);
+        processor.setClassifier(classifier);
+        
+        return processor;
     }
 }
