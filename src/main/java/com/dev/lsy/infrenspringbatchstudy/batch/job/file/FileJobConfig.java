@@ -51,23 +51,6 @@ public class FileJobConfig {
                 .writer(fileItemWriter())
                 .build();
     }
-
-
-    @Bean
-    //jpa Writer
-    public ItemWriter<Product> fileItemWriter() {
-        return new JpaItemWriterBuilder<Product>()
-                .entityManagerFactory(entityManagerFactory)
-                .usePersist(true)
-                .build();
-    }
-
-    @Bean
-    //processor
-    public ItemProcessor<ProductVo, Product> fileItemProcessor() {
-        return new FileItemProcessor();
-    }
-
     @Bean
     @StepScope
     //fileReader
@@ -82,4 +65,20 @@ public class FileJobConfig {
                 .names("id", "name", "price", "type")
                 .build();
     }
+    @Bean
+    //processor
+    public ItemProcessor<ProductVo, Product> fileItemProcessor() {
+        return new FileItemProcessor();
+    }
+
+    @Bean
+    //jpa Writer
+    public ItemWriter<Product> fileItemWriter() {
+        return new JpaItemWriterBuilder<Product>()
+                .entityManagerFactory(entityManagerFactory)
+                .usePersist(true)
+                .build();
+    }
+
+
 }
