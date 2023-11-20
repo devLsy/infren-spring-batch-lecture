@@ -1,5 +1,6 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job.api;
 
+import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiRequestVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ProductVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.partition.ProductPartitioner;
 import lombok.RequiredArgsConstructor;
@@ -8,14 +9,19 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.partition.support.Partitioner;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
+import org.springframework.batch.item.support.ClassifierCompositeItemProcessor;
+import org.springframework.batch.item.support.builder.ClassifierCompositeItemProcessorBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -31,13 +37,24 @@ public class ApiStepConfig {
     private int chunkSize = 10;
 
     @Bean
-    public Step apiMasterStep() {
+    public Step apiMasterStep() throws Exception {
         return stepBuilderFactory.get("apiMasterStep")
                 .partitioner(apiSlaveStep().getName(), partitioner())
                 .step(apiSlaveStep())
                 .gridSize(3)
                 .taskExecutor(taskExcutor())
                 .build();
+    }
+
+    @Bean
+    public TaskExecutor taskExcutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        //기본 스레드 3개
+        taskExecutor.setCorePoolSize(3);
+        //최대 6개
+        taskExecutor.setMaxPoolSize(6);
+        taskExecutor.setThreadNamePrefix("api-thread-");
+
     }
 
 
@@ -50,6 +67,8 @@ public class ApiStepConfig {
                 .writer(itemWriter())
                 .build();
     }
+
+
 
     @Bean
     @StepScope
@@ -80,5 +99,12 @@ public class ApiStepConfig {
         ProductPartitioner productPartitioner = new ProductPartitioner();
         productPartitioner.setDataSource(dataSource);
         return productPartitioner;
+    }
+
+
+    @Bean
+    public ItemProcessor itemProcessor() {
+        ClassifierCompositeItemProcessor<ProductVo, ApiRequestVo> processor
+                = new ClassifierCompositeItemProcessor<ProductVo, ApiRequestVo>();
     }
 }
