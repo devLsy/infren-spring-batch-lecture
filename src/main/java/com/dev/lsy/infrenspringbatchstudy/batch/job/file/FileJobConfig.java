@@ -10,6 +10,7 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
@@ -68,6 +69,7 @@ public class FileJobConfig {
     }
 
     @Bean
+    @StepScope
     //fileReader
     public FlatFileItemReader<ProductVo> fileItemReader(@Value("#{jobParameters['requestDate']}") String requestDate) {
         return new FlatFileItemReaderBuilder<ProductVo>()
