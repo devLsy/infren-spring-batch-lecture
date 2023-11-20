@@ -16,6 +16,4 @@ spring:
     jdbc:
       initialize-schema: always
     job:
-      enabled: true
-    job:
       names: ${job.name:NONE}
