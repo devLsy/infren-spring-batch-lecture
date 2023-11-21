@@ -1,15 +1,23 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job;
 
+import com.dev.lsy.infrenspringbatchstudy.batch.domain.Customer;
+import com.dev.lsy.infrenspringbatchstudy.batch.rowMapper.CustomRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.batch.item.database.Order;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,50 +39,43 @@ public class AsyncConfig {
     //동기
     public Step step1() throws Exception{
         return stepBuilderFactory.get("step1")
-                .chunk(100)
-//                .reader(pagingItemReader())
-//                .writer(customItemWriter())
+                .chunk(10)
+                .reader(pagingItemReader())
                 .build();
     }
-
 
     @Bean
-    //비동기
-    public Step asyncStep1() {
-        return stepBuilderFactory.get("asyncStep1")
-                .chunk(100)
-//                .reader(pagingItemReader())
+    public ItemWriter<? super Customer> customItemWriter() {
+
+        return new JdbcBatchItemWriterBuilder<Customer>()
+                .dataSource(dataSource)
+                .sql("insert into customer2 values (:id, :firstName, :lastName, :birthdate)")
+                .beanMapped()
                 .build();
     }
 
-//    @Bean
-    //jdbcPagingItemReader
-//    public JdbcPagingItemReader<Customer> pagingItemReader() {
-//        JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();
-//
-//        reader.setDataSource(dataSource);
-//        reader.setFetchSize(300);
-//        reader.setRowMapper(new CustomRowMapper());
-//
-//        MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
-//        queryProvider.setSelectClause("id, firstName, lastName, birthdate");
-//        queryProvider.setFromClause("from customer");
-//
-//        Map<String, Order> sortKeys = new HashMap<>();
-//        sortKeys.put("id", Order.ASCENDING);
-//
-//        return reader;
-//    }
+    @Bean
+    public JdbcPagingItemReader<Customer> pagingItemReader() {
 
-//    @Bean
-    //jdbcItemWriter
-//    public ItemWriter<Customer> customItemWriter() {
-//        JdbcBatchItemWriter<Customer> itemWriter = new JdbcBatchItemWriter<>();
-//
-//        itemWriter.setDataSource(dataSource);
-//        itemWriter.setSql("insert into customer2 values (:id, :firstName, :lastName, :birthdate)");
-//        itemWriter.afterPropertiesSet();
-//
-//        return itemWriter;
-//    }
+        JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();
+
+        reader.setDataSource(dataSource);
+        reader.setFetchSize(30);
+        reader.setRowMapper(new CustomRowMapper());
+
+        MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
+        queryProvider.setSelectClause("id, firstName, lastName, birthdate");
+        queryProvider.setFromClause("from customer");
+
+        Map<String, Object> sortKerys = new HashMap<>();
+
+        sortKerys.put("id", Order.ASCENDING);
+        queryProvider.setSortKeys(sortKerys);
+        reader.setQueryProvider(queryProvider);
+
+        HashMap<String, Object> parameters = new HashMap<>();
+
+        return reader;
+    }
+
 }
