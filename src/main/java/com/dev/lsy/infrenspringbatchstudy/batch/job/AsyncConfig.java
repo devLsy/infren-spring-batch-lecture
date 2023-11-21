@@ -13,6 +13,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.integration.async.AsyncItemProcessor;
 import org.springframework.batch.integration.async.AsyncItemWriter;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
@@ -139,6 +140,7 @@ public class AsyncConfig {
 
         itemWriter.setDataSource(dataSource);
         itemWriter.setSql("insert into customer2 values (:id, :firstName, :lastName, :birthdate)");
+        itemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider());
         itemWriter.afterPropertiesSet();
 
         return itemWriter;
@@ -160,7 +162,7 @@ public class AsyncConfig {
         queryProvider.setSelectClause("id, first_name, last_name, birthdate");
         queryProvider.setFromClause("from customer");
 
-        Map<String, Order> sortKeys = new HashMap<>();
+        Map<String, Order> sortKeys = new HashMap<>(1);
 
         sortKeys.put("id", Order.ASCENDING);
 

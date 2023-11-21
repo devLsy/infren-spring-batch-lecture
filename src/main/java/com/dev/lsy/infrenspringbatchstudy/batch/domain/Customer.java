@@ -12,5 +12,5 @@ public class Customer {
     private Long id;
     private String firstName;
     private String lastName;
-    private Date birthdate;
+    private String birthdate;
 }
