@@ -34,17 +34,28 @@ public class AsyncConfig {
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
 
+    /**
+     * job 
+     * @return
+     * @throws Exception
+     */
     @Bean
     public Job job() throws Exception {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
+//                .start(asyncStep1())
                 .listener(new StopWatchjobListener())
                 .build();
     }
 
+    /**
+     * 동기 step 
+     * @return
+     * @throws Exception
+     */
     @Bean
-    public Step step1() throws Exception{
+    public Step step1() throws Exception {
         return stepBuilderFactory.get("step1")
                 .<Customer, Customer>chunk(100)
                 .reader(pagingItemReader())
@@ -53,6 +64,11 @@ public class AsyncConfig {
                 .build();
     }
 
+    /**
+     * 비동기 step 
+     * @return
+     * @throws Exception
+     */
     @Bean
     public Step asyncStep1() throws Exception{
         return stepBuilderFactory.get("asyncStep1")
@@ -63,6 +79,10 @@ public class AsyncConfig {
                 .build();
     }
 
+    /**
+     * 비동기 writer 
+     * @return
+     */
     @Bean
     public AsyncItemWriter asyncItemWriter() {
 
@@ -72,6 +92,11 @@ public class AsyncConfig {
         return asyncItemWriter;
     }
 
+    /**
+     * 비동기 프로세서 
+     * @return
+     * @throws InterruptedException
+     */
     @Bean
     public AsyncItemProcessor asyncItemProcessor() throws InterruptedException {
 
@@ -82,14 +107,19 @@ public class AsyncConfig {
         return asyncItemProcessor;
     }
 
+    /**
+     * 동기 프로세서
+     * @return
+     * @throws InterruptedException
+     */
     @Bean
-    public ItemProcessor<? super Customer, Customer> customItemProcessor() throws InterruptedException{
+    public ItemProcessor<Customer, Customer> customItemProcessor() throws InterruptedException{
 
         return new ItemProcessor<Customer, Customer>() {
             @Override
             public Customer process(Customer item) throws Exception {
 
-                Thread.sleep(10);
+                Thread.sleep(30);
 
                 return new Customer(item.getId(), item.getFirstName().toUpperCase(),
                         item.getLastName().toUpperCase(),
@@ -99,6 +129,10 @@ public class AsyncConfig {
         };
     }
 
+    /**
+     * 커스텀 writer
+     * @return
+     */
     @Bean
     public JdbcBatchItemWriter customItemWriter() {
         JdbcBatchItemWriter<Customer> itemWriter = new JdbcBatchItemWriter<>();
@@ -110,6 +144,10 @@ public class AsyncConfig {
         return itemWriter;
     }
 
+    /**
+     * 동기 reader
+     * @return
+     */
     @Bean
     public JdbcPagingItemReader<Customer> pagingItemReader() {
         JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();

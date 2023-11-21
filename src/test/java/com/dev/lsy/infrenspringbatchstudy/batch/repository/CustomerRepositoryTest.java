@@ -12,17 +12,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class CustomerRepositoryTest {
 
-//    @Autowired
-//    private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerRepository customerRepository;
 
-//    @Test
-//    @Commit
-//    @DisplayName("사용자 저장")
-//    public void save() {
-//
-//        for (int i = 1; i < 51; i++) {
-//            customerRepository.save(new CustomerEntity((long) i, i + "_firstName", i + "_lastName", i + "_birthdate"));
-//        }
-//    }
+    @Test
+    @Commit
+    @DisplayName("사용자저장")
+    public void save() {
 
+        for (int i = 1; i < 51; i++) {
+            customerRepository.save(new CustomerEntity((long) i, i + "_firstName", i + "_lastName", i + "_birthdate"));
+        }
+    }
 }
