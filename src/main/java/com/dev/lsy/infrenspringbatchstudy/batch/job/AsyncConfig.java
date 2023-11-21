@@ -21,6 +21,8 @@ import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -44,8 +46,8 @@ public class AsyncConfig {
     public Job job() throws Exception {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
-//                .start(step1())
-                .start(asyncStep1())
+                .start(step1())
+//                .start(asyncStep1())
                 .listener(new StopWatchjobListener())
                 .build();
     }
@@ -62,7 +64,20 @@ public class AsyncConfig {
                 .reader(pagingItemReader())
                 .processor(customItemProcessor())
                 .writer(customItemWriter())
+//                .taskExecutor(taskExecutor())
                 .build();
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        //기본 스레드 개수
+        taskExecutor.setCorePoolSize(4);
+        //최대 스레드 개수
+        taskExecutor.setMaxPoolSize(8);
+        taskExecutor.setThreadNamePrefix("async-thread");
+
+        return taskExecutor;
     }
 
     /**
