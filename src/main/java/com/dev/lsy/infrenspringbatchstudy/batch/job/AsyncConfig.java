@@ -1,6 +1,9 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job;
 
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.Customer;
+import com.dev.lsy.infrenspringbatchstudy.batch.listener.CustomItemReadListener;
+import com.dev.lsy.infrenspringbatchstudy.batch.listener.CustomItemWriterListener;
+import com.dev.lsy.infrenspringbatchstudy.batch.listener.CustomItermProcessorListener;
 import com.dev.lsy.infrenspringbatchstudy.batch.listener.StopWatchjobListener;
 import com.dev.lsy.infrenspringbatchstudy.batch.mapper.CustomRowMapper;
 import lombok.RequiredArgsConstructor;
@@ -62,8 +65,11 @@ public class AsyncConfig {
         return stepBuilderFactory.get("step1")
                 .<Customer, Customer>chunk(100)
                 .reader(pagingItemReader())
+                .listener(new CustomItemReadListener())
                 .processor(customItemProcessor())
+                .listener(new CustomItermProcessorListener())
                 .writer(customItemWriter())
+                .listener(new CustomItemWriterListener())
 //                .taskExecutor(taskExecutor())
                 .build();
     }
@@ -186,6 +192,4 @@ public class AsyncConfig {
 
         return reader;
     }
-
-
 }
