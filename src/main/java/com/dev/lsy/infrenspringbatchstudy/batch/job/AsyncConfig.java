@@ -1,31 +1,19 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job;
 
-import com.dev.lsy.infrenspringbatchstudy.batch.domain.Customer;
-import com.dev.lsy.infrenspringbatchstudy.batch.rowMapper.CustomRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.database.JdbcPagingItemReader;
-import org.springframework.batch.item.database.Order;
-import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
-import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
+//@Configuration
 public class AsyncConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
@@ -44,8 +32,8 @@ public class AsyncConfig {
     public Step step1() throws Exception{
         return stepBuilderFactory.get("step1")
                 .chunk(100)
-                .reader(pagingItemReader())
-                .writer(customItemWriter())
+//                .reader(pagingItemReader())
+//                .writer(customItemWriter())
                 .build();
     }
 
@@ -55,34 +43,38 @@ public class AsyncConfig {
     public Step asyncStep1() {
         return stepBuilderFactory.get("asyncStep1")
                 .chunk(100)
-                .reader(pagingItemReader())
+//                .reader(pagingItemReader())
                 .build();
     }
 
-    @Bean
-    public JdbcPagingItemReader<Customer> pagingItemReader() {
-        JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();
+//    @Bean
+    //jdbcPagingItemReader
+//    public JdbcPagingItemReader<Customer> pagingItemReader() {
+//        JdbcPagingItemReader<Customer> reader = new JdbcPagingItemReader<>();
+//
+//        reader.setDataSource(dataSource);
+//        reader.setFetchSize(300);
+//        reader.setRowMapper(new CustomRowMapper());
+//
+//        MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
+//        queryProvider.setSelectClause("id, firstName, lastName, birthdate");
+//        queryProvider.setFromClause("from customer");
+//
+//        Map<String, Order> sortKeys = new HashMap<>();
+//        sortKeys.put("id", Order.ASCENDING);
+//
+//        return reader;
+//    }
 
-        reader.setDataSource(dataSource);
-        reader.setFetchSize(300);
-        reader.setRowMapper(new CustomRowMapper());
-
-        MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
-        queryProvider.setSelectClause("id, firstName, lastName, birthdate");
-        queryProvider.setFromClause("from customer");
-
-        Map<String, Order> sortKeys = new HashMap<>();
-        sortKeys.put("id", Order.ASCENDING);
-
-        return reader;
-    }
-
-    @Bean
-    public JdbcBatchItemWriter<Customer> customItemWriter() {
-        JdbcBatchItemWriter<Customer> itemWriter = new JdbcBatchItemWriter<>();
-
-        itemWriter.setDataSource(dataSource);
-        itemWriter.setSql("insert into customer2 values (:id, :firstName, :lastName, :birthdate)");
-        itemWriter.afterPropertiesSet();
-    }
+//    @Bean
+    //jdbcItemWriter
+//    public ItemWriter<Customer> customItemWriter() {
+//        JdbcBatchItemWriter<Customer> itemWriter = new JdbcBatchItemWriter<>();
+//
+//        itemWriter.setDataSource(dataSource);
+//        itemWriter.setSql("insert into customer2 values (:id, :firstName, :lastName, :birthdate)");
+//        itemWriter.afterPropertiesSet();
+//
+//        return itemWriter;
+//    }
 }
