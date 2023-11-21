@@ -8,11 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class ApiService1 extends AbstractApiService{
 
-    private final AbstractApiService apiService;
 
     @Override
     protected ApiResponseVo doApiService(RestTemplate restTemplate, ApiInfo apiInfo) {

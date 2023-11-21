@@ -11,7 +11,6 @@ import com.dev.lsy.infrenspringbatchstudy.batch.classifier.WriterClassifier;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiRequestVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ProductVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.partition.ProductPartitioner;
-import com.dev.lsy.infrenspringbatchstudy.service.AbstractApiService;
 import com.dev.lsy.infrenspringbatchstudy.service.ApiService1;
 import com.dev.lsy.infrenspringbatchstudy.service.ApiService2;
 import com.dev.lsy.infrenspringbatchstudy.service.ApiService3;
