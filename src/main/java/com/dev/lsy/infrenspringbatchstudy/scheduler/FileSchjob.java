@@ -40,7 +40,8 @@ public class FileSchjob extends QuartzJobBean {
 
         int jobInstanceCount = jobExplorer.getJobInstanceCount(fileJob.getName());
         List<JobInstance> jobInstances = jobExplorer.getJobInstances(fileJob.getName(), 0, jobInstanceCount);
-
+        
+        //이미 저장된 requestDate에 대해서는 job 실행하지 않음
         if (jobInstances.size() > 0) {
             for (JobInstance jobInstance : jobInstances) {
                 List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
