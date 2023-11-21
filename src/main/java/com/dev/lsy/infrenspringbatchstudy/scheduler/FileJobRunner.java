@@ -26,9 +26,9 @@ public class FileJobRunner extends JobRunner {
         String[] sourceArgs = args.getSourceArgs();
 
         JobDetail jobDetail = buildJobDetail(FileSchjob.class, "fileJob", "batch", new HashMap());
-        Trigger trigger = buildJobTrigger("/50 * * * * ?");
+        Trigger trigger = buildJobTrigger("/40 * * * * ?");
         jobDetail.getJobDataMap().put("requestDate", sourceArgs[0]);
-
+    
         try {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
