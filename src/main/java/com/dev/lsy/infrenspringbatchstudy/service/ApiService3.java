@@ -1,7 +1,5 @@
 package com.dev.lsy.infrenspringbatchstudy.service;
 
-import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiInfo;
-import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiResponseVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

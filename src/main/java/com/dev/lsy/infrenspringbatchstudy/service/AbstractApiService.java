@@ -1,9 +1,6 @@
 package com.dev.lsy.infrenspringbatchstudy.service;
 
 
-import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiInfo;
-import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiRequestVo;
-import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiResponseVo;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
