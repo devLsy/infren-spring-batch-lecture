@@ -29,11 +29,10 @@ public class ApiJobConfig {
         return jobBuilderFactory.get("apiJob")
                 .listener(new JobListener())
                 .start(apiStep1())
-                .next(jobStep())
+                .next(jobStep)
                 .next(apiStep2())
                 .build();
     }
-
 
     @Bean
     public Step apiStep1() {

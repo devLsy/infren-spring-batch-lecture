@@ -11,6 +11,10 @@ import com.dev.lsy.infrenspringbatchstudy.batch.classifier.WriterClassifier;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiRequestVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ProductVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.partition.ProductPartitioner;
+import com.dev.lsy.infrenspringbatchstudy.service.AbstractApiService;
+import com.dev.lsy.infrenspringbatchstudy.service.ApiService1;
+import com.dev.lsy.infrenspringbatchstudy.service.ApiService2;
+import com.dev.lsy.infrenspringbatchstudy.service.ApiService3;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Step;
@@ -42,6 +46,9 @@ public class ApiStepConfig {
 
     private final StepBuilderFactory stepBuilderFactory;
     private final DataSource dataSource;
+    private final ApiService1 apiService1;
+    private final ApiService2 apiService2;
+    private final ApiService3 apiService3;
 
     private int chunkSize = 10;
 
@@ -64,6 +71,7 @@ public class ApiStepConfig {
         taskExecutor.setMaxPoolSize(6);
         taskExecutor.setThreadNamePrefix("api-thread-");
 
+        return taskExecutor;
     }
 
 
@@ -84,9 +92,9 @@ public class ApiStepConfig {
         WriterClassifier<ApiRequestVo, ItemWriter<? super ApiRequestVo>> classifier = new WriterClassifier<>();
 
         Map<String, ItemWriter<ApiRequestVo>> writerMap = new HashMap<>();
-        writerMap.put("1", new ApiItemWriter1());
-        writerMap.put("2", new ApiItemWriter2());
-        writerMap.put("3", new ApiItemWriter3());
+        writerMap.put("1", new ApiItemWriter1(apiService1));
+        writerMap.put("2", new ApiItemWriter2(apiService2));
+        writerMap.put("3", new ApiItemWriter3(apiService3));
 
         classifier.setWriterMap(writerMap);
 
@@ -98,7 +106,7 @@ public class ApiStepConfig {
 
     @Bean
     @StepScope
-    public ItemReader<ProductVo> itemReader(@Value("#{jobParameters['product']}") String product) {
+    public ItemReader<ProductVo> itemReader(@Value("#{jobParameters['product']}") ProductVo productVo) throws Exception {
 
         JdbcPagingItemReader<ProductVo> reader = new JdbcPagingItemReader<>();
 
@@ -115,9 +123,11 @@ public class ApiStepConfig {
         sortKeys.put("id", Order.DESCENDING);
         mySqlPagingQueryProvider.setSortKeys(sortKeys);
 
-        reader.setParameterValues(QueryGenerator.getParameterForQuery("type", ProductVo.getType()));
+        reader.setParameterValues(QueryGenerator.getParameterForQuery("type", productVo.getType()));
         reader.setQueryProvider(mySqlPagingQueryProvider);
         reader.afterPropertiesSet();
+
+        return reader;
     }
 
     @Bean
