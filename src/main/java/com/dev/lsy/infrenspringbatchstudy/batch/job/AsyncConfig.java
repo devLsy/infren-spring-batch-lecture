@@ -1,7 +1,8 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job;
 
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.Customer;
-import com.dev.lsy.infrenspringbatchstudy.batch.rowMapper.CustomRowMapper;
+import com.dev.lsy.infrenspringbatchstudy.batch.listener.StopWatchjobListener;
+import com.dev.lsy.infrenspringbatchstudy.batch.mapper.CustomRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -12,8 +13,6 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.integration.async.AsyncItemProcessor;
 import org.springframework.batch.integration.async.AsyncItemWriter;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
@@ -40,6 +39,7 @@ public class AsyncConfig {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
+                .listener(new StopWatchjobListener())
                 .build();
     }
 
@@ -84,8 +84,8 @@ public class AsyncConfig {
 
     @Bean
     public ItemProcessor<? super Customer, Customer> customItemProcessor() throws InterruptedException{
-        return new ItemProcessor<Customer, Customer>() {
 
+        return new ItemProcessor<Customer, Customer>() {
             @Override
             public Customer process(Customer item) throws Exception {
 
@@ -119,7 +119,7 @@ public class AsyncConfig {
         reader.setRowMapper(new CustomRowMapper());
 
         MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
-        queryProvider.setSelectClause("id, firstName, lastName, birthdate");
+        queryProvider.setSelectClause("id, first_name, last_name, birthdate");
         queryProvider.setFromClause("from customer");
 
         Map<String, Order> sortKeys = new HashMap<>();
