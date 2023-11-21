@@ -10,10 +10,9 @@ public class CustomRowMapper implements RowMapper<Customer> {
 
     @Override
     public Customer mapRow(ResultSet rs, int rowNum) throws SQLException {
-        return Customer.builder()
-                .firstName(rs.getString("firstName"))
-                .lastName(rs.getString("lastName"))
-                .birthdate(rs.getString("birthdate"))
-                .build();
+        return new Customer(rs.getLong("id"),
+                            rs.getString("firstname"),
+                            rs.getString("lastName"),
+                            rs.getDate("birthdate"));
     }
 }

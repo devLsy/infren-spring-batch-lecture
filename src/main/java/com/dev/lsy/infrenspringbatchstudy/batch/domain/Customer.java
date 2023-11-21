@@ -1,14 +1,16 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.domain;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
-@Builder
+@AllArgsConstructor
 public class Customer {
 
     private Long id;
     private String firstName;
     private String lastName;
-    private String birthdate;
+    private Date birthdate;
 }
