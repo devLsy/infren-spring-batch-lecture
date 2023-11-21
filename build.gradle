@@ -27,6 +27,7 @@ dependencies {
     implementation 'org.testng:testng:7.1.0'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'org.springframework.batch:spring-batch-integration'
     implementation 'org.apache.httpcomponents:httpclient'
     implementation 'org.modelmapper:modelmapper:2.4.4'
     compileOnly 'org.projectlombok:lombok'
