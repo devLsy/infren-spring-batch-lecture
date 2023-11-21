@@ -37,7 +37,7 @@ public class AsyncConfig {
 
     @Bean
     public Job job() throws Exception {
-        return jobBuilderFactory.get("")
+        return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
                 .build();
