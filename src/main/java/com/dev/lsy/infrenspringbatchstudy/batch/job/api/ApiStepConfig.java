@@ -3,7 +3,11 @@ package com.dev.lsy.infrenspringbatchstudy.batch.job.api;
 import com.dev.lsy.infrenspringbatchstudy.batch.chunk.processor.ApiItemProcessor1;
 import com.dev.lsy.infrenspringbatchstudy.batch.chunk.processor.ApiItemProcessor2;
 import com.dev.lsy.infrenspringbatchstudy.batch.chunk.processor.ApiItemProcessor3;
+import com.dev.lsy.infrenspringbatchstudy.batch.chunk.writer.ApiItemWriter1;
+import com.dev.lsy.infrenspringbatchstudy.batch.chunk.writer.ApiItemWriter2;
+import com.dev.lsy.infrenspringbatchstudy.batch.chunk.writer.ApiItemWriter3;
 import com.dev.lsy.infrenspringbatchstudy.batch.classifier.ProcessorClassifier;
+import com.dev.lsy.infrenspringbatchstudy.batch.classifier.WriterClassifier;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ApiRequestVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ProductVo;
 import com.dev.lsy.infrenspringbatchstudy.batch.partition.ProductPartitioner;
@@ -12,14 +16,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.batch.item.support.ClassifierCompositeItemProcessor;
-import org.springframework.batch.item.support.builder.ClassifierCompositeItemProcessorBuilder;
+import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,6 +77,23 @@ public class ApiStepConfig {
                 .build();
     }
 
+    @Bean
+    public ItemWriter itemWriter() {
+
+        ClassifierCompositeItemWriter<ApiRequestVo> writer = new ClassifierCompositeItemWriter<>();
+        WriterClassifier<ApiRequestVo, ItemWriter<? super ApiRequestVo>> classifier = new WriterClassifier<>();
+
+        Map<String, ItemWriter<ApiRequestVo>> writerMap = new HashMap<>();
+        writerMap.put("1", new ApiItemWriter1());
+        writerMap.put("2", new ApiItemWriter2());
+        writerMap.put("3", new ApiItemWriter3());
+
+        classifier.setWriterMap(writerMap);
+
+        writer.setClassifier(classifier);
+
+        return writer;
+    }
 
 
     @Bean
@@ -121,7 +142,7 @@ public class ApiStepConfig {
 
         classifier.setProcessorMap(processorMap);
         processor.setClassifier(classifier);
-        
+
         return processor;
     }
 }
