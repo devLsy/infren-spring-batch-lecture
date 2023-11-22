@@ -14,6 +14,11 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.JpaItemWriter;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
@@ -25,6 +30,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,7 +40,7 @@ public class FileJobConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final EntityManagerFactory entityManagerFactory;
+    private final DataSource dataSource;
     private final int chunkSize = 100;
 
     @Bean
@@ -56,7 +62,7 @@ public class FileJobConfig {
                 .writer(customFlatItemWriter())
                 .listener(new CustomItemWriteListener())
                 //비동기
-                .taskExecutor(taskExecutor())
+//                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -87,10 +93,16 @@ public class FileJobConfig {
    }
 
     @Bean
-    public ItemWriter<Product> customFlatItemWriter() {
+    public JdbcBatchItemWriter<Product> customFlatItemWriter() {
 
-        return items -> {
-            items.forEach(item -> log.info("item ==> [{}]", item));
-        };
+        JdbcBatchItemWriter<Product> itemWriter = new JdbcBatchItemWriter<>();
+
+        itemWriter.setDataSource(dataSource);
+//        itemWriter.setSql("insert into customer values (:id, :firstName, :lastName, :birthdate)");
+        itemWriter.setSql("insert into product values (:id, :name, :price, :type)");
+        itemWriter.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider());
+        itemWriter.afterPropertiesSet();
+
+        return itemWriter;
     }
 }
