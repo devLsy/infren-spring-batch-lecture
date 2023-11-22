@@ -1,7 +1,6 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job.file;
 
 
-import com.dev.lsy.infrenspringbatchstudy.batch.chunk.processor.FileItemProcessor;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.Product;
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.ProductVo;
 import lombok.RequiredArgsConstructor;
