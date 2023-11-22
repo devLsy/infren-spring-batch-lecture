@@ -66,7 +66,7 @@ public class FileJobConfig {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(4);
         executor.setMaxPoolSize(8);
-        executor.setThreadNamePrefix("Sub-Thread");
+        executor.setThreadNamePrefix("sub-thread");
         
         return executor;
     }
