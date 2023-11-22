@@ -19,7 +19,7 @@ class CustomerRepositoryTest {
     @DisplayName("사용자저장")
     public void save() {
 
-        for (int i = 1; i < 51; i++) {
+        for (int i = 1; i < 1001; i++) {
             customerRepository.save(new CustomerEntity((long) i, i + "_firstName", i + "_lastName", i + "_birthdate"));
         }   
     }

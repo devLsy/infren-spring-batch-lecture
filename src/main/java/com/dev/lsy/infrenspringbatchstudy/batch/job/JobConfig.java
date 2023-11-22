@@ -47,9 +47,7 @@ public class JobConfig {
     public Step masterStep() {
         return stepBuilderFactory.get("masterStep")
                 .partitioner(slaveStep().getName(), partitioner())
-                //slave step
                 .step(slaveStep())
-                //slave execution 4개 설정
                 .gridSize(4)
                 .taskExecutor(new SimpleAsyncTaskExecutor())
                 .build();
@@ -92,7 +90,7 @@ public class JobConfig {
         MySqlPagingQueryProvider queryProvider = new MySqlPagingQueryProvider();
         queryProvider.setSelectClause("id, first_name, last_name, birthdate");
         queryProvider.setFromClause("from customer");
-        queryProvider.setWhereClause("where id >= " + minValue + "and id < " + maxValue);
+        queryProvider.setWhereClause("where id >= " + minValue + " and id <= " + maxValue);
 
 
         Map<String, Order> sortKeys = new HashMap<>(1);
@@ -106,6 +104,7 @@ public class JobConfig {
     }
 
     @Bean
+    @StepScope
     public JdbcBatchItemWriter customItemWriter() {
         JdbcBatchItemWriter<Customer> itemWriter = new JdbcBatchItemWriter<>();
 
