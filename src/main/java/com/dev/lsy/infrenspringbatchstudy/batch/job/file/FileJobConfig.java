@@ -2,6 +2,8 @@ package com.dev.lsy.infrenspringbatchstudy.batch.job.file;
 
 
 import com.dev.lsy.infrenspringbatchstudy.batch.domain.Product;
+import com.dev.lsy.infrenspringbatchstudy.batch.listener.CustomItemReadListener;
+import com.dev.lsy.infrenspringbatchstudy.batch.listener.CustomItemWriteListener;
 import com.dev.lsy.infrenspringbatchstudy.batch.listener.JobListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -18,6 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.persistence.EntityManagerFactory;
 
@@ -35,6 +40,7 @@ public class FileJobConfig {
     @Bean
     public Job fileJob() {
         return jobBuilderFactory.get("filejob")
+                .incrementer(new RunIdIncrementer())
                 .start(fileStep1())
                 .listener(new JobListener())
                 .build();
@@ -46,12 +52,27 @@ public class FileJobConfig {
         return stepBuilderFactory.get("fileStep1")
                 .<Product, Product>chunk(chunkSize)
                 .reader(customFlatItemReader(null))
+                .listener(new CustomItemReadListener())
                 .writer(customFlatItemWriter())
+                .listener(new CustomItemWriteListener())
+                //비동기
+//                .taskExecutor(taskExecutor())
                 .build();
     }
 
+//    @Bean
+    public TaskExecutor taskExecutor() {
 
-   @Bean
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
+        executor.setThreadNamePrefix("Sub-Thread");
+        
+        return executor;
+    }
+
+
+    @Bean
    @StepScope
    public FlatFileItemReader<Product> customFlatItemReader(@Value("#{jobParameters['requestDate']}") String requestDate) {
        return new FlatFileItemReaderBuilder<Product>()
