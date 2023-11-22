@@ -14,6 +14,6 @@ public class JobListener implements JobExecutionListener {
     @Override
     public void afterJob(JobExecution jobExecution) {
         long time = jobExecution.getEndTime().getTime() - jobExecution.getStartTime().getTime();
-        log.info("총 소요시간 ==> {}", time);
+        log.info("총 소요시간 ==> {} ms", time);
     }
 }
