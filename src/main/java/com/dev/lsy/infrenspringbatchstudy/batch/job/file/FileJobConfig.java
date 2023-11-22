@@ -56,7 +56,7 @@ public class FileJobConfig {
                 .writer(customFlatItemWriter())
                 .listener(new CustomItemWriteListener())
                 //비동기
-//                .taskExecutor(taskExecutor())
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
