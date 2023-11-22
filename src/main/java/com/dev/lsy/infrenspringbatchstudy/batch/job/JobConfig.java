@@ -1,6 +1,7 @@
 package com.dev.lsy.infrenspringbatchstudy.batch.job;
 
 import com.dev.lsy.infrenspringbatchstudy.batch.job.domain.Customer;
+import com.dev.lsy.infrenspringbatchstudy.batch.job.listener.StopWatchjobListener;
 import com.dev.lsy.infrenspringbatchstudy.batch.job.mapper.CustomRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.springframework.batch.item.database.*;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
+import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.batch.item.support.builder.SynchronizedItemStreamReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -38,6 +41,7 @@ public class JobConfig {
             return jobBuilderFactory.get("batchJob")
                     .incrementer(new RunIdIncrementer())
                     .start(step1())
+                    .listener(new StopWatchjobListener())
                     .build();
         }
 
@@ -78,14 +82,29 @@ public class JobConfig {
 
         @Bean
         //non thread safety reader
-        public JdbcCursorItemReader<Customer> pagingItemReader() {
+//        public JdbcCursorItemReader<Customer> pagingItemReader() {
+//
+//            return new JdbcCursorItemReaderBuilder<Customer>()
+//                    .fetchSize(60)
+//                    .dataSource(dataSource)
+//                    .rowMapper(new BeanPropertyRowMapper<>(Customer.class))
+//                    .sql("select id, first_name, last_name, birthdate from customer")
+//                    .name("NonSafeTyReader")
+//                    .build();
+//        }
+        //safety thread reader
+        public SynchronizedItemStreamReader<Customer> pagingItemReader() {
 
-            return new JdbcCursorItemReaderBuilder<Customer>()
+            JdbcCursorItemReader<Customer> nonSafeTyReader = new JdbcCursorItemReaderBuilder<Customer>()
                     .fetchSize(60)
                     .dataSource(dataSource)
                     .rowMapper(new BeanPropertyRowMapper<>(Customer.class))
                     .sql("select id, first_name, last_name, birthdate from customer")
                     .name("NonSafeTyReader")
+                    .build();
+
+            return new SynchronizedItemStreamReaderBuilder<Customer>()
+                    .delegate(nonSafeTyReader)
                     .build();
         }
 
