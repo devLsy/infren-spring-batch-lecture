@@ -4,6 +4,7 @@ import com.dev.lsy.infrenspringbatchstudy.batch.job.domain.Customer;
 import com.dev.lsy.infrenspringbatchstudy.batch.job.mapper.CustomRowMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.ItemReadListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -45,6 +46,22 @@ public class JobConfig {
             return stepBuilderFactory.get("step1")
                     .<Customer, Customer>chunk(60)
                     .reader(pagingItemReader())
+                    .listener(new ItemReadListener<Customer>() {
+                        @Override
+                        public void beforeRead() {
+
+                        }
+
+                        @Override
+                        public void afterRead(Customer item) {
+                            log.info("Thread : " + Thread.currentThread().getName() + " item.getId()" + item.getId());
+                        }
+
+                        @Override
+                        public void onReadError(Exception ex) {
+
+                        }
+                    })
                     .writer(customItemWriter())
                     .taskExecutor(taskExecutor())
                     .build();
@@ -66,12 +83,12 @@ public class JobConfig {
             return new JdbcCursorItemReaderBuilder<Customer>()
                     .fetchSize(60)
                     .dataSource(dataSource)
-                    .rowMapper(new BeanPropertyRowMapper<>())
+                    .rowMapper(new BeanPropertyRowMapper<>(Customer.class))
                     .sql("select id, first_name, last_name, birthdate from customer")
                     .name("NonSafeTyReader")
                     .build();
         }
-        
+
         @Bean
         public JdbcBatchItemWriter customItemWriter() {
             JdbcBatchItemWriter<Customer> itemWriter = new JdbcBatchItemWriter<>();
