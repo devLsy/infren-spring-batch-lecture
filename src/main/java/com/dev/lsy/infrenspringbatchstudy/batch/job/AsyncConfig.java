@@ -48,7 +48,8 @@ public class AsyncConfig {
     public Job job() throws Exception {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
-                .start(step1())
+//                .start(step1())
+                .start(asyncStep1())
                 .listener(new StopWatchjobListener())
                 .build();
     }
@@ -63,9 +64,58 @@ public class AsyncConfig {
         return stepBuilderFactory.get("step1")
                 .<Customer, Customer>chunk(100)
                 .reader(pagingItemReader())
-//                .processor(customItemProcessor())
+                .processor(customItemProcessor())
                 .writer(customItemWriter())
                 .build();
+    }
+
+
+    @Bean
+    //비동기 스텝
+    public Step asyncStep1() throws Exception{
+        return stepBuilderFactory.get("asyncStep1")
+                .<Customer, Customer>chunk(100)
+                .reader(pagingItemReader())
+                //비동기 프로세서
+                .processor(asyncItemProcessor())
+                //비동기 라이터
+                .writer(asyncItemWriter())
+                .build();
+    }
+
+    @Bean
+    //비동기 프로세서
+    public AsyncItemProcessor asyncItemProcessor() {
+        //비동기 프로세서 객체 생성후 세팅
+        AsyncItemProcessor<Customer, Customer> asyncItemProcessor = new AsyncItemProcessor<>();
+        //프로세서에게 실제 작업 위임
+        asyncItemProcessor.setDelegate(customItemProcessor());
+        //스레드 할당
+        asyncItemProcessor.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        return asyncItemProcessor;
+    }
+
+    @Bean
+    //비동기 쓰기
+    public AsyncItemWriter asyncItemWriter() {
+        
+        AsyncItemWriter<Customer> asyncItemWriter = new AsyncItemWriter<>();
+        //쓰기에게 위임
+        asyncItemWriter.setDelegate(customItemWriter());
+        return asyncItemWriter;
+    }
+
+    @Bean
+    //단순히 대문자로만 변경하는 처리
+    public ItemProcessor<Customer, Customer> customItemProcessor() {
+        return new ItemProcessor<Customer, Customer>() {
+            @Override
+            public Customer process(Customer item) throws Exception {
+    
+                Thread.sleep(20);
+                return new Customer(item.getId(), item.getFirstName().toUpperCase(), item.getLastName().toUpperCase(), item.getBirthdate());
+            }
+        };
     }
 
     /**
