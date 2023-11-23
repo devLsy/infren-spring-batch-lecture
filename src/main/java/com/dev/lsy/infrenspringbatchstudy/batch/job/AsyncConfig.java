@@ -69,7 +69,7 @@ public class AsyncConfig {
                 .listener(new CustomItermProcessorListener())
                 .writer(customItemWriter())
                 .listener(new CustomItemWriterListener())
-                .taskExecutor(taskExecutor())
+//                .taskExecutor(taskExecutor())
                 .build();
     }
 
