@@ -50,7 +50,6 @@ public class AsyncConfig {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
                 .start(step1())
-//                .start(asyncStep1())
                 .listener(new StopWatchjobListener())
                 .build();
     }
@@ -70,7 +69,7 @@ public class AsyncConfig {
                 .listener(new CustomItermProcessorListener())
                 .writer(customItemWriter())
                 .listener(new CustomItemWriterListener())
-//                .taskExecutor(taskExecutor())
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
