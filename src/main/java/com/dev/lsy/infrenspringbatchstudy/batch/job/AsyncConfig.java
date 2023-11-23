@@ -48,21 +48,8 @@ public class AsyncConfig {
     public Job job() throws Exception {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
-//                .start(step1())
-                .start(asyncFileStep1())
+                .start(step1())
                 .listener(new StopWatchjobListener())
-                .build();
-    }
-
-    private Step asyncFileStep1() {
-        return stepBuilderFactory.get("asyncFileStep1")
-                .<Customer, Customer>chunk(100)
-                .reader(pagingItemReader())
-                .listener(new CustomItemReadListener())
-                .processor(asyncItemProcessor())
-                .listener(new CustomItermProcessorListener())
-                .writer(asyncItemWriter())
-                .listener(new CustomItemWriterListener())
                 .build();
     }
 
@@ -77,55 +64,11 @@ public class AsyncConfig {
                 .<Customer, Customer>chunk(100)
                 .reader(pagingItemReader())
                 .listener(new CustomItemReadListener())
-                .processor(customItemProcessor())
-                .listener(new CustomItermProcessorListener())
                 .writer(customItemWriter())
                 .listener(new CustomItemWriterListener())
 //                .taskExecutor(taskExecutor())
                 .build();
     }
-
-    /**
-     * 비동기 step 
-     * @return
-     * @throws Exception
-     */
-    @Bean
-    public Step asyncStep1() throws Exception{
-        return stepBuilderFactory.get("asyncStep1")
-                .<Customer, Customer>chunk(100)
-                .reader(pagingItemReader())
-                .processor(asyncItemProcessor())
-                .writer(asyncItemWriter())
-                .build();
-    }
-
-    @Bean
-    public ItemWriter asyncItemWriter() {
-        AsyncItemWriter<Customer> asyncItemWriter = new AsyncItemWriter<>();
-        asyncItemWriter.setDelegate(customItemWriter());
-        return asyncItemWriter;
-    }
-
-    @Bean
-    public ItemProcessor asyncItemProcessor() {
-        AsyncItemProcessor<Customer, Customer> asyncItemProcessor = new AsyncItemProcessor<>();
-        asyncItemProcessor.setDelegate(customItemProcessor());
-        asyncItemProcessor.setTaskExecutor(new SimpleAsyncTaskExecutor());
-        return asyncItemProcessor;
-    }
-
-    @Bean
-    public ItemProcessor<Customer, Customer> customItemProcessor() {
-        return new ItemProcessor<Customer, Customer>() {
-            @Override
-            public Customer process(Customer item) throws Exception {
-                Thread.sleep(30);
-                return new Customer(item.getId(), item.getFirstName() + "수정", item.getLastName() + "수정", item.getBirthdate());
-            }
-        };
-    }
-
 
     /**
      * 커스텀 writer
