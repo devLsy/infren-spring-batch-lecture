@@ -49,7 +49,8 @@ public class AsyncConfig {
     public Job job() throws Exception {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
-                .start(step1())
+//                .start(step1())
+                .start(asyncFileStep1())
                 .listener(new StopWatchjobListener())
                 .build();
     }
@@ -73,18 +74,6 @@ public class AsyncConfig {
                 .build();
     }
 
-    @Bean
-    public TaskExecutor taskExecutor() {
-        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        //기본 스레드 개수
-        taskExecutor.setCorePoolSize(4);
-        //최대 스레드 개수
-        taskExecutor.setMaxPoolSize(8);
-        taskExecutor.setThreadNamePrefix("async-thread");
-
-        return taskExecutor;
-    }
-
     /**
      * 비동기 step 
      * @return
@@ -100,55 +89,11 @@ public class AsyncConfig {
                 .build();
     }
 
-    /**
-     * 비동기 writer 
-     * @return
-     */
-    @Bean
-    public AsyncItemWriter asyncItemWriter() {
 
-        AsyncItemWriter<Customer> asyncItemWriter = new AsyncItemWriter<>();
-        asyncItemWriter.setDelegate(customItemWriter());
 
-        return asyncItemWriter;
-    }
 
-    /**
-     * 비동기 프로세서 
-     * @return
-     * @throws InterruptedException
-     */
-    @Bean
-    public AsyncItemProcessor asyncItemProcessor() throws InterruptedException {
 
-        AsyncItemProcessor<Customer, Customer> asyncItemProcessor = new AsyncItemProcessor<>();
-        asyncItemProcessor.setDelegate((ItemProcessor<Customer, Customer>) customItemProcessor());
-        asyncItemProcessor.setTaskExecutor(new SimpleAsyncTaskExecutor());
 
-        return asyncItemProcessor;
-    }
-
-    /**
-     * 동기 프로세서
-     * @return
-     * @throws InterruptedException
-     */
-    @Bean
-    public ItemProcessor<Customer, Customer> customItemProcessor() throws InterruptedException{
-
-        return new ItemProcessor<Customer, Customer>() {
-            @Override
-            public Customer process(Customer item) throws Exception {
-
-                Thread.sleep(30);
-
-                return new Customer(item.getId(), item.getFirstName().toUpperCase(),
-                        item.getLastName().toUpperCase(),
-                        item.getBirthdate()
-                );
-            }
-        };
-    }
 
     /**
      * 커스텀 writer
