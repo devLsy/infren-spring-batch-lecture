@@ -48,7 +48,8 @@ public class AsyncConfig {
     public Job job() throws Exception {
         return jobBuilderFactory.get("batchJob")
                 .incrementer(new RunIdIncrementer())
-                .start(step1())
+//                .start(step1())
+                .start(asyncStep1())
                 .listener(new StopWatchjobListener())
                 .build();
     }
@@ -63,12 +64,48 @@ public class AsyncConfig {
         return stepBuilderFactory.get("step1")
                 .<Customer, Customer>chunk(100)
                 .reader(pagingItemReader())
-                .listener(new CustomItemReadListener())
+                .processor(customItemProcessor())
                 .writer(customItemWriter())
-                .listener(new CustomItemWriterListener())
-//                .taskExecutor(taskExecutor())
                 .build();
     }
+    @Bean
+    public Step asyncStep1() throws Exception{
+        return stepBuilderFactory.get("asyncStep1")
+                .<Customer, Customer>chunk(100)
+                .reader(pagingItemReader())
+                .processor(asyncItemProcessor())
+                .writer(asyncItemWriter())
+                .build();
+    }
+
+    @Bean
+    public AsyncItemWriter asyncItemWriter() {
+        AsyncItemWriter<Customer> asyncItemWriter = new AsyncItemWriter<>();
+        asyncItemWriter.setDelegate(customItemWriter());
+        return asyncItemWriter;
+    }
+
+    @Bean
+    public AsyncItemProcessor asyncItemProcessor() {
+
+        AsyncItemProcessor<Customer, Customer> asyncItemProcessor = new AsyncItemProcessor<>();
+        asyncItemProcessor.setDelegate(customItemProcessor());
+        asyncItemProcessor.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        return asyncItemProcessor;
+    }
+
+    @Bean
+    public ItemProcessor<Customer, Customer> customItemProcessor() {
+        return new ItemProcessor<Customer, Customer>() {
+            @Override
+            public Customer process(Customer item) throws Exception {
+
+                Thread.sleep(20);
+                return new Customer(item.getId(), item.getFirstName().toUpperCase(), item.getLastName().toUpperCase(), item.getBirthdate());
+            }
+        };
+    }
+
 
     /**
      * 커스텀 writer
