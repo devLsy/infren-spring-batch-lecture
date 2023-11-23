@@ -16,6 +16,7 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.integration.async.AsyncItemProcessor;
 import org.springframework.batch.integration.async.AsyncItemWriter;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
@@ -24,8 +25,6 @@ import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -52,6 +51,18 @@ public class AsyncConfig {
 //                .start(step1())
                 .start(asyncFileStep1())
                 .listener(new StopWatchjobListener())
+                .build();
+    }
+
+    private Step asyncFileStep1() {
+        return stepBuilderFactory.get("asyncFileStep1")
+                .<Customer, Customer>chunk(100)
+                .reader(pagingItemReader())
+                .listener(new CustomItemReadListener())
+                .processor(asyncItemProcessor())
+                .listener(new CustomItermProcessorListener())
+                .writer(asyncItemWriter())
+                .listener(new CustomItemWriterListener())
                 .build();
     }
 
@@ -89,10 +100,31 @@ public class AsyncConfig {
                 .build();
     }
 
+    @Bean
+    public ItemWriter asyncItemWriter() {
+        AsyncItemWriter<Customer> asyncItemWriter = new AsyncItemWriter<>();
+        asyncItemWriter.setDelegate(customItemWriter());
+        return asyncItemWriter;
+    }
 
+    @Bean
+    public ItemProcessor asyncItemProcessor() {
+        AsyncItemProcessor<Customer, Customer> asyncItemProcessor = new AsyncItemProcessor<>();
+        asyncItemProcessor.setDelegate(customItemProcessor());
+        asyncItemProcessor.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        return asyncItemProcessor;
+    }
 
-
-
+    @Bean
+    public ItemProcessor<Customer, Customer> customItemProcessor() {
+        return new ItemProcessor<Customer, Customer>() {
+            @Override
+            public Customer process(Customer item) throws Exception {
+                Thread.sleep(30);
+                return new Customer(item.getId(), item.getFirstName() + "수정", item.getLastName() + "수정", item.getBirthdate());
+            }
+        };
+    }
 
 
     /**
